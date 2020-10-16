@@ -2,19 +2,59 @@
 //
 
 #include <iostream>
+#include <iomanip>
+#include <fstream>
 
-int main()
+int main( int argc, char** argv )
 {
-    std::cout << "Hello World!\n";
+   int arg = argc > 0 ? 1 : 0;
+
+   std::cout << argv[ arg ] << std::endl << std::endl;
+
+   std::ifstream is;
+   is.open( argv[ arg ], std::ios::binary );
+
+   // Get the file length
+   is.seekg( 0, std::ios::end );
+   std::streamoff length = is.tellg();
+   is.seekg( 0, std::ios::beg );
+
+   std::streamoff current = 0;
+   std::streamoff width = 16;
+   std::streamoff count = 2;
+
+   std::ios_base::fmtflags f( std::cout.flags() );  // save flags state
+   while ( current < length )
+   {
+      std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
+
+      for ( std::streamoff loop = 0; loop < width; )
+      {
+         unsigned long value = 0;
+         for ( std::streamoff i = 0; i < count; i++, loop++, current++ )
+         {
+            if ( current == length )
+            {
+               break;
+            }
+            value <<= 8;
+            value += is.get();
+         }
+
+         std::cout << " " << std::setw( (std::streamsize) pow( 2, (int) count ) ) << value;
+         if ( current == length )
+         {
+            break;
+         }
+      }
+
+      std::cout << std::endl;
+      if ( current == length )
+      {
+         break;
+      }
+   }
+   std::cout.flags( f );  // restore flags state
+
+   is.close();
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
