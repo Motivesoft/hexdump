@@ -8,33 +8,39 @@
 
 int main( int argc, char** argv )
 {
-   if ( argc <= 1 )
-   {
-      std::cerr << "Filename not specified" << std::endl;
-      return 2;
-   }
-
-   // Filename argument
-   int arg = 1;
-
-   std::ifstream is;
-   is.open( argv[ arg ], std::ios::binary );
-
-   if ( !is.is_open() )
-   {
-      std::cerr << "Failed to open file: " << argv[ arg ] << std::endl;
-      return 2;
-   }
-
-   // Get the file length - we will use this to avoid reading past the end of the file
-   is.seekg( 0, std::ios::end );
-   std::streamoff length = is.tellg();
-   is.seekg( 0, std::ios::beg );
-
    // Some counters and sizes
+   bool done = false;
    std::streamoff current = 0;
    std::streamoff width = 16;
    std::streamoff count = 2;
+   std::streamoff length = LONG_MAX;
+
+   std::istream* cs;
+   std::ifstream is;
+   if ( argc <= 1 )
+   { 
+      cs = &std::cin;
+   }
+   else
+   {
+      // Filename argument
+      int arg = 1;
+
+      is.open( argv[ arg ], std::ios::binary );
+
+      if ( !is.is_open() )
+      {
+         std::cerr << "Failed to open file: " << argv[ arg ] << std::endl;
+         return 2;
+      }
+
+      // Get the file length - we will use this to avoid reading past the end of the file
+      is.seekg( 0, std::ios::end );
+      length = is.tellg();
+      is.seekg( 0, std::ios::beg );
+
+      cs = &is;
+   }
 
    // The read/display loop
    std::ios_base::fmtflags f( std::cout.flags() );  // save flags state
@@ -53,14 +59,16 @@ int main( int argc, char** argv )
             // If we hit the end of the file, step out
             if ( current == length )
             {
+               done = true;
                break;
             }
 
             // Try and get the next value
-            int next = is.get();
-            if ( !is.good() )
+            int next = cs->get();
+            if ( !cs->good() )
             {
                // End of stream (expected or not)
+               done = true;
                break;
             }
 
@@ -70,8 +78,12 @@ int main( int argc, char** argv )
          }
 
          // Write the value - single or multibyte as configured and depending on bytes read
-         std::cout << " " << std::setw( (std::streamsize) pow( 2, (int) std::min( i, count ) ) ) << value;
-         if ( current == length )
+         if ( i )
+         {
+            std::cout << " " << std::setw( ( std::streamsize ) pow( 2, (int) std::min( i, count ) ) ) << value;
+         }
+
+         if ( done )
          {
             break;
          }
@@ -81,7 +93,7 @@ int main( int argc, char** argv )
       std::cout << std::endl;
 
       // Step out if we've hit the end of the file
-      if ( current == length )
+      if ( done )
       {
          // hexdump on Linux dumps out the end address
          std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
