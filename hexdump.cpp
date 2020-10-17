@@ -56,8 +56,17 @@ int main( int argc, char** argv )
                break;
             }
 
+            // Try and get the next value
+            int next = is.get();
+            if ( !is.good() )
+            {
+               // End of stream (expected or not)
+               break;
+            }
+
+            // Process the value read
             value <<= 8;
-            value += is.get();
+            value += next;
          }
 
          // Write the value - single or multibyte as configured and depending on bytes read
