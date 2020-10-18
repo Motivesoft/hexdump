@@ -6,34 +6,25 @@
 #include <iomanip>
 #include <fstream>
 
+#include "Launch.h"
+
 int process( std::istream& cs );
 
 int main( int argc, char** argv )
 {
    int result;
-   if ( argc <= 1 )
+
+   try
    {
-      result = process( std::cin );
+      Launch* launch = Launch::CreateLaunch( argc, argv );
+      result = process( launch->GetStream() );
    }
-   else
+   catch ( std::exception ex )
    {
-      // Filename argument
-      int arg = 1;
-
-      std::ifstream is;
-      is.open( argv[ arg ], std::ios::binary );
-
-      if ( !is.is_open() )
-      {
-         std::cerr << "Failed to open file: " << argv[ arg ] << std::endl;
-         return 2;
-      }
-
-      result = process( is );
-
-      // Release resources
-      is.close();
+      std::cerr << ex.what() << std::endl;
+      result = 1;
    }
+
    return result;
 }
 
