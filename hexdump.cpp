@@ -6,26 +6,21 @@
 #include <iomanip>
 #include <fstream>
 
+int process( std::istream& cs );
+
 int main( int argc, char** argv )
 {
-   // Some counters and sizes
-   bool done = false;
-   std::streamoff current = 0;
-   std::streamoff width = 16;
-   std::streamoff count = 2;
-   std::streamoff length = LONG_MAX;
-
-   std::istream* cs;
-   std::ifstream is;
+   int result;
    if ( argc <= 1 )
-   { 
-      cs = &std::cin;
+   {
+      result = process( std::cin );
    }
    else
    {
       // Filename argument
       int arg = 1;
 
+      std::ifstream is;
       is.open( argv[ arg ], std::ios::binary );
 
       if ( !is.is_open() )
@@ -34,17 +29,25 @@ int main( int argc, char** argv )
          return 2;
       }
 
-      // Get the file length - we will use this to avoid reading past the end of the file
-      is.seekg( 0, std::ios::end );
-      length = is.tellg();
-      is.seekg( 0, std::ios::beg );
+      result = process( is );
 
-      cs = &is;
+      // Release resources
+      is.close();
    }
+   return result;
+}
+
+int process( std::istream& cs )
+{
+   // Some counters and sizes
+   bool done = false;
+   std::streamoff current = 0;
+   std::streamoff width = 16;
+   std::streamoff count = 2;
 
    // The read/display loop
    std::ios_base::fmtflags f( std::cout.flags() );  // save flags state
-   while ( current < length )
+   while ( cs.good() )
    {
       // Write out the current address at the start of the line
       std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
@@ -56,16 +59,9 @@ int main( int argc, char** argv )
          std::streamoff i;
          for ( i = 0; i < count; i++, loop++, current++ )
          {
-            // If we hit the end of the file, step out
-            if ( current == length )
-            {
-               done = true;
-               break;
-            }
-
             // Try and get the next value
-            int next = cs->get();
-            if ( !cs->good() )
+            int next = cs.get();
+            if ( !cs.good() )
             {
                // End of stream (expected or not)
                done = true;
@@ -103,9 +99,6 @@ int main( int argc, char** argv )
 
    // Restore flags state
    std::cout.flags( f );  
-
-   // Release resources
-   is.close();
 
    // Signal success
    return 0;
