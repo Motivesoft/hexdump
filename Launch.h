@@ -1,12 +1,10 @@
 #pragma once
 
 #include <algorithm>
-#include <iostream>
 #include <iomanip>
 #include <fstream>
-
 #include <istream>
-#include <fstream>
+#include <iostream>
 #include <sstream>
 
 class Launch

@@ -2,9 +2,10 @@
 //
 
 #include <algorithm>
-#include <iostream>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 #include "Launch.h"
 
@@ -43,9 +44,12 @@ int process( Launch* launch )
    while ( cs.good() )
    {
       // Write out the current address at the start of the line
-      std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
+      std::ostringstream location;
+      location << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
 
       // Line at a time
+      std::ostringstream hexdata;
+      hexdata << std::hex << std::setfill( '0' ) << std::nouppercase;
       for ( std::streamoff loop = 0; loop < width; )
       {
          unsigned long value = 0;
@@ -69,7 +73,7 @@ int process( Launch* launch )
          // Write the value - single or multibyte as configured and depending on bytes read
          if ( i )
          {
-            std::cout << " " << std::setw( ( std::streamsize ) pow( 2, (int) std::min( i, count ) ) ) << value;
+            hexdata << " " << std::setw( ( std::streamsize ) pow( 2, (int) std::min( i, count ) ) ) << value;
          }
 
          if ( done )
@@ -78,17 +82,17 @@ int process( Launch* launch )
          }
       }
 
-      // Finish the line
-      std::cout << std::endl;
+      // Write the line
+      if ( !hexdata.str().empty() )
+      {
+         std::cout << location.str() << hexdata.str() << std::endl;
+      }
 
       // Step out if we've hit the end of the file
       if ( done )
       {
-         if ( current % 16 ) // TODO we may take this out once we've changed the way the output is constructed
-         {
-            // hexdump on Linux dumps out the end address
-            std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
-         }
+         // hexdump on Linux dumps out the end address
+         std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
          break;
       }
    }

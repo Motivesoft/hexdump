@@ -8,7 +8,7 @@ Launch* Launch::CreateLaunch( int argc, char** argv )
 
    for ( int i = 1; i < argc; )
    {
-      size_t additionalArgs = argc - i;
+      int additionalArgs = argc - i;
       std::string arg( argv[ i++ ] );
 
       if ( !arg.empty() )
