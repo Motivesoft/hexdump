@@ -41,6 +41,9 @@ int process( Launch* launch )
 
    // The read/display loop
    std::ios_base::fmtflags f( std::cout.flags() );  // save flags state
+
+   std::string previousLine;
+   bool matchesPreviousLine = false;
    while ( cs.good() )
    {
       // Write out the current address at the start of the line
@@ -85,7 +88,21 @@ int process( Launch* launch )
       // Write the line
       if ( !hexdata.str().empty() )
       {
-         std::cout << location.str() << hexdata.str() << std::endl;
+         if ( previousLine == hexdata.str() )
+         {
+            if ( !matchesPreviousLine )
+            {
+               matchesPreviousLine = true;
+
+               std::cout << "*" << std::endl;
+            }
+         }
+         else
+         {
+            matchesPreviousLine = false;
+            std::cout << location.str() << hexdata.str() << std::endl;
+            previousLine = hexdata.str();
+         }
       }
 
       // Step out if we've hit the end of the file
