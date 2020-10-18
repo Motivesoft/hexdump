@@ -34,7 +34,7 @@ int process( std::istream& cs )
    bool done = false;
    std::streamoff current = 0;
    std::streamoff width = 16;
-   std::streamoff count = 2;
+   std::streamoff count = 1;// 2;
 
    // The read/display loop
    std::ios_base::fmtflags f( std::cout.flags() );  // save flags state
@@ -82,8 +82,11 @@ int process( std::istream& cs )
       // Step out if we've hit the end of the file
       if ( done )
       {
-         // hexdump on Linux dumps out the end address
-         std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
+         if ( current % 16 ) // TODO we may take this out once we've changed the way the output is constructed
+         {
+            // hexdump on Linux dumps out the end address
+            std::cout << std::hex << std::setw( 8 ) << std::setfill( '0' ) << std::nouppercase << current;
+         }
          break;
       }
    }

@@ -18,7 +18,7 @@ Launch* Launch::CreateLaunch( int argc, char** argv )
          }
          else
          {
-            // Treat as an input file
+            // Treat as an input file 
             builder.SetFilename( arg );
          }
       }
