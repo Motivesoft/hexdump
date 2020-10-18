@@ -8,13 +8,20 @@ Launch* Launch::CreateLaunch( int argc, char** argv )
 
    for ( int i = 1; i < argc; )
    {
+      size_t additionalArgs = argc - i;
       std::string arg( argv[ i++ ] );
 
       if ( !arg.empty() )
       {
          if ( arg[ 0 ] == '-' || arg[ 0 ] == '/' )
          {
+            std::string param = arg.substr( 1 );
+
             // Process command line switches
+            if ( param == "C" )
+            {
+               builder.setCanonical();
+            }
          }
          else
          {
@@ -31,8 +38,8 @@ Launch* Launch::LaunchBuilder::Build()
 {
    if ( hasFilename )
    {
-      return new FileLaunch( filename );
+      return new FileLaunch( filename, isCanonical );
    }
 
-   return new StreamLaunch();
+   return new StreamLaunch( isCanonical  );
 }

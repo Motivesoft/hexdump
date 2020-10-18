@@ -11,15 +11,23 @@
 
 class Launch
 {
+private:
+   bool isCanonical;
+
 public:
    static Launch* CreateLaunch( int argc, char** argv );
 
    virtual std::istream& GetStream() = 0;
 
-protected:
-   Launch()
+   bool IsCanonical()
    {
-      // Nothing to do
+      return isCanonical;
+   }
+
+protected:
+   Launch( bool isCanonical )
+   {
+      this->isCanonical = isCanonical;
    }
 
    virtual ~Launch()
@@ -27,15 +35,18 @@ protected:
       // Nothing to do
    }
 
+private:
    class LaunchBuilder
    {
    private:
+      bool isCanonical;
       bool hasFilename;
       std::string filename;
 
    public:
       LaunchBuilder()
       {
+         isCanonical = false;
          hasFilename = false;
       }
 
@@ -49,15 +60,19 @@ protected:
             hasFilename = true;
          }
       }
+
+      void setCanonical()
+      {
+         isCanonical = true;
+      }
    };
 };
 
 class StreamLaunch : public Launch
 {
 public:
-   StreamLaunch()
+   StreamLaunch( bool isCanonical ) : Launch( isCanonical )
    {
-      // Nothing to do
    }
 
    virtual std::istream& GetStream()
@@ -74,7 +89,7 @@ private:
    bool opened;
 
 public:
-   FileLaunch( std::string& filename )
+   FileLaunch( std::string& filename, bool isCanonical ) : Launch( isCanonical )
    {
       this->filename = filename;
    }

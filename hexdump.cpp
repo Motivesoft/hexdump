@@ -8,7 +8,7 @@
 
 #include "Launch.h"
 
-int process( std::istream& cs );
+int process( Launch* launch );
 
 int main( int argc, char** argv )
 {
@@ -17,7 +17,7 @@ int main( int argc, char** argv )
    try
    {
       Launch* launch = Launch::CreateLaunch( argc, argv );
-      result = process( launch->GetStream() );
+      result = process( launch );
    }
    catch ( std::exception ex )
    {
@@ -28,13 +28,15 @@ int main( int argc, char** argv )
    return result;
 }
 
-int process( std::istream& cs )
+int process( Launch* launch )
 {
+   std::istream& cs = launch->GetStream();
+
    // Some counters and sizes
    bool done = false;
    std::streamoff current = 0;
    std::streamoff width = 16;
-   std::streamoff count = 1;// 2;
+   std::streamoff count = launch->IsCanonical() ? 1 : 2;
 
    // The read/display loop
    std::ios_base::fmtflags f( std::cout.flags() );  // save flags state
