@@ -75,6 +75,11 @@ private:
          isCanonical = true;
       }
 
+      void setTwoByte()
+      {
+         isCanonical = false;
+      }
+
       void setBigEndian()
       {
          isBigEndian = true;

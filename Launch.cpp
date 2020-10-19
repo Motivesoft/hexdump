@@ -22,6 +22,10 @@ Launch* Launch::CreateLaunch( int argc, char** argv )
             {
                builder.setCanonical();
             }
+            if ( param == "x" )
+            {
+               builder.setTwoByte();
+            }
             if ( param == "be" )
             {
                builder.setBigEndian();
