@@ -69,12 +69,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Motivesoft"
             VALUE "FileDescription", "hexdump - a simple command line utility to output a file in hex format"
-            VALUE "FileVersion", "0.1.0.0"
+            VALUE "FileVersion", "0.2.0.0"
             VALUE "InternalName", "hexdump.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2020"
+            VALUE "LegalCopyright", "Copyright (C) 2020 Motivesoft"
             VALUE "OriginalFilename", "hexdump.exe"
             VALUE "ProductName", "hexdump"
-            VALUE "ProductVersion", "0.1.0.0"
+            VALUE "ProductVersion", "0.2.0.0"
         END
     END
     BLOCK "VarFileInfo"
