@@ -120,6 +120,8 @@ int process( Launch* launch )
             std::cout << location.str() << hexdata.str();
             if ( launch->IsCanonical() )
             {
+               // Output the chars - but put some padding first if required
+               std::cout << std::string( 3 * width, ' ' ).substr( hexdata.str().length() );
                std::cout << "  |" << chardata.str().c_str() << "|";
             }
             std::cout << std::endl;
