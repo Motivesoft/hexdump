@@ -11,6 +11,7 @@ class Launch
 {
 private:
    bool isCanonical;
+   bool isBigEndian;
 
 public:
    static Launch* CreateLaunch( int argc, char** argv );
@@ -22,10 +23,16 @@ public:
       return isCanonical;
    }
 
+   bool IsBigEndian()
+   {
+      return isBigEndian;
+   }
+
 protected:
-   Launch( bool isCanonical )
+   Launch( bool isCanonical, bool isBigEndian )
    {
       this->isCanonical = isCanonical;
+      this->isBigEndian = isBigEndian;
    }
 
    virtual ~Launch()
@@ -38,13 +45,17 @@ private:
    {
    private:
       bool isCanonical;
+      bool isBigEndian;
       bool hasFilename;
       std::string filename;
 
    public:
       LaunchBuilder()
       {
+         uint16_t i = 1;
+         uint8_t s = *(uint8_t*) &i;
          isCanonical = false;
+         isBigEndian = s == 0;
          hasFilename = false;
       }
 
@@ -63,13 +74,23 @@ private:
       {
          isCanonical = true;
       }
+
+      void setBigEndian()
+      {
+         isBigEndian = true;
+      }
+
+      void setLittleEndian()
+      {
+         isBigEndian = false;
+      }
    };
 };
 
 class StreamLaunch : public Launch
 {
 public:
-   StreamLaunch( bool isCanonical ) : Launch( isCanonical )
+   StreamLaunch( bool isCanonical, bool isBigEndian ) : Launch( isCanonical, isBigEndian )
    {
    }
 
@@ -87,7 +108,7 @@ private:
    bool opened;
 
 public:
-   FileLaunch( std::string& filename, bool isCanonical ) : Launch( isCanonical )
+   FileLaunch( std::string& filename, bool isCanonical, bool isBigEndian ) : Launch( isCanonical, isBigEndian )
    {
       this->filename = filename;
    }

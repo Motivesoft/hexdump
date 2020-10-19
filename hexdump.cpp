@@ -52,6 +52,7 @@ int process( Launch* launch )
 
       // Line at a time
       std::ostringstream hexdata;
+      std::ostringstream chardata;
       hexdata << std::hex << std::setfill( '0' ) << std::nouppercase;
       for ( std::streamoff loop = 0; loop < width; )
       {
@@ -69,8 +70,24 @@ int process( Launch* launch )
             }
 
             // Process the value read
-            value <<= 8;
-            value += next;
+            if ( i == 0 )
+            {
+               value = next;
+            }
+            else
+            {
+               if ( launch->IsBigEndian() )
+               {
+                  value <<= 8;
+                  value += next;
+               }
+               else
+               {
+                  value += (next << 8);
+               }
+            }
+
+            chardata << (isascii( next ) && next >= 0x20 ? (char) next : '.');
          }
 
          // Write the value - single or multibyte as configured and depending on bytes read
@@ -100,7 +117,12 @@ int process( Launch* launch )
          else
          {
             matchesPreviousLine = false;
-            std::cout << location.str() << hexdata.str() << std::endl;
+            std::cout << location.str() << hexdata.str();
+            if ( launch->IsCanonical() )
+            {
+               std::cout << "  |" << chardata.str().c_str() << "|";
+            }
+            std::cout << std::endl;
             previousLine = hexdata.str();
          }
       }

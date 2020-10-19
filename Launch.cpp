@@ -22,6 +22,14 @@ Launch* Launch::CreateLaunch( int argc, char** argv )
             {
                builder.setCanonical();
             }
+            if ( param == "be" )
+            {
+               builder.setBigEndian();
+            }
+            if ( param == "le" )
+            {
+               builder.setLittleEndian();
+            }
          }
          else
          {
@@ -38,8 +46,8 @@ Launch* Launch::LaunchBuilder::Build()
 {
    if ( hasFilename )
    {
-      return new FileLaunch( filename, isCanonical );
+      return new FileLaunch( filename, isCanonical, isBigEndian );
    }
 
-   return new StreamLaunch( isCanonical  );
+   return new StreamLaunch( isCanonical, isBigEndian );
 }
