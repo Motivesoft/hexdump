@@ -1,5 +1,32 @@
-// hexdump.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+/*
+ * hexdump
+ *
+ * A simple executable to show the contents of a file, or the input stream as hex. This is
+ * somewhat similar to the Linux hexdump utility, but is not intended to be a full reproduction,
+ * start with the basics and build on it from there as I find reason to.
+ *
+ * MIT License
+ *
+ * Copyright (c) 2020 Motivesoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include <algorithm>
 #include <fstream>
@@ -7,18 +34,39 @@
 #include <iostream>
 #include <sstream>
 
+#include "Arguments.h"
 #include "Launch.h"
 
 int process( Launch* launch );
+std::string getAppName( const char* arg0 );
+void showHelp( std::string app );
 
-int main( int argc, char** argv )
+int main( int argc, const char** argv )
 {
-   int result;
+   int result = 0;
 
    try
    {
-      Launch* launch = Launch::CreateLaunch( argc, argv );
-      result = process( launch );
+      Arguments* args = Arguments::ParseArguments( argc, argv );
+
+      if( args->HasOneOf( { "-?", "-h", "/?", "/h", "--help" } ) )
+      {
+         showHelp( getAppName( argv[ 0 ] ) );
+      }
+      else
+      {
+         std::vector<std::string> unrecognised( args->FindAnyUnrecognised( { "-C", "/C", "-x", "/x", "-be", "/be", "-le", "/le" } ) );
+         if ( !unrecognised.empty() )
+         {
+            std::cerr << "Unrecognised argument: " << unrecognised[ 0 ].c_str() << std::endl;
+            showHelp( getAppName( argv[ 0 ] ) );
+         }
+         else
+         {
+            Launch* launch = Launch::CreateLaunch( args );
+            result = process( launch );
+         }
+      }
    }
    catch ( std::exception ex )
    {
@@ -121,7 +169,7 @@ int process( Launch* launch )
             if ( launch->IsCanonical() )
             {
                // Output the chars - but put some padding first if required
-               std::cout << std::string( 3 * width, ' ' ).substr( hexdata.str().length() );
+               std::cout << std::string( (size_t)( width * 3 ), ' ' ).substr( hexdata.str().length() );
                std::cout << "  |" << chardata.str().c_str() << "|";
             }
             std::cout << std::endl;
@@ -143,4 +191,30 @@ int process( Launch* launch )
 
    // Signal success
    return 0;
+}
+
+std::string getAppName( const char* arg0 )
+{
+   char appName[ _MAX_FNAME ];
+   _splitpath_s( arg0, NULL, 0, NULL, 0, appName, _MAX_FNAME, NULL, 0 );
+   _strlwr_s( appName, _MAX_FNAME );
+   return appName;
+}
+
+void showHelp( std::string app )
+{
+   std::cout << std::endl;
+   std::cout << "Usage:" << std::endl;
+   std::cout << "  " << app.c_str() << " <options> <filename>" << std::endl;
+   std::cout << "" << std::endl;
+   std::cout << "Options:" << std::endl;
+   std::cout << "  -C   canonical form, single byte hex output and printable characters" << std::endl;
+   std::cout << "  -x   two byte hex output (default)" << std::endl;
+   std::cout << "  -be  treat the data as big-endian when using -x" << std::endl;
+   std::cout << "  -le  treat the data as little-endian when using -x" << std::endl;
+   std::cout << "  -h   this help information" << std::endl;
+   std::cout << "" << std::endl;
+   std::cout << "If filename is excluded, the input stream shall be used instead. For example:" << std::endl;
+   std::cout << "  dir | " << app.c_str() << std::endl;
+   std::cout << std::endl;
 }

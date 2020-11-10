@@ -6,6 +6,7 @@
 #include <istream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 class Launch
 {
@@ -14,7 +15,8 @@ private:
    bool isBigEndian;
 
 public:
-   static Launch* CreateLaunch( int argc, char** argv );
+   static std::vector<std::string> CollectArgs( int argc, char** argv );
+   static Launch* CreateLaunch( Arguments* arguments );
 
    virtual std::istream& GetStream() = 0;
 
@@ -48,6 +50,8 @@ private:
       bool isBigEndian;
       bool hasFilename;
       std::string filename;
+
+      std::vector<std::string> unrecognised;
 
    public:
       LaunchBuilder()

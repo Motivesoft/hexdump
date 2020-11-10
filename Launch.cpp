@@ -1,46 +1,34 @@
 #include <string>
 
+#include "Arguments.h"
 #include "Launch.h"
 
-Launch* Launch::CreateLaunch( int argc, char** argv )
+Launch* Launch::CreateLaunch( Arguments* arguments )
 {
    LaunchBuilder builder;
 
-   for ( int i = 1; i < argc; )
+   // Process command line switches
+   if ( arguments->HasOneOf( { "-C", "/C" } ) )
    {
-      int additionalArgs = argc - i;
-      std::string arg( argv[ i++ ] );
+      builder.setCanonical();
+   }
+   if ( arguments->HasOneOf( { "-x", "/x" } ) )
+   {
+      builder.setTwoByte();
+   }
+   if ( arguments->HasOneOf( { "-be", "/be" } ) )
+   {
+      builder.setBigEndian();
+   }
+   if ( arguments->HasOneOf( { "-le", "/le" } ) )
+   {
+      builder.setLittleEndian();
+   }
 
-      if ( !arg.empty() )
-      {
-         if ( arg[ 0 ] == '-' || arg[ 0 ] == '/' )
-         {
-            std::string param = arg.substr( 1 );
-
-            // Process command line switches
-            if ( param == "C" )
-            {
-               builder.setCanonical();
-            }
-            if ( param == "x" )
-            {
-               builder.setTwoByte();
-            }
-            if ( param == "be" )
-            {
-               builder.setBigEndian();
-            }
-            if ( param == "le" )
-            {
-               builder.setLittleEndian();
-            }
-         }
-         else
-         {
-            // Treat as an input file 
-            builder.SetFilename( arg );
-         }
-      }
+   // Treat as an input file 
+   if ( arguments->HasOrphaned() )
+   {
+      builder.SetFilename( arguments->GetOrphaned()[ 0 ] );
    }
 
    return builder.Build();
